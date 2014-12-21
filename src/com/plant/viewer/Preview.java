@@ -136,9 +136,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private double level_angle = 0.0f;
 	private double orig_level_angle = 0.0f;
 	
-	private float free_memory_gb = -1.0f;
-	private long last_free_memory_time = 0;
-
+	
 	private boolean has_zoom = false;
 	private int zoom_factor = 0;
 	private int max_zoom_factor = 0;
@@ -869,16 +867,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "saved_is_video: " + saved_is_video);
 		}
-		if( saved_is_video != this.is_video ) {
-			this.switchVideo(false, false);
-		}
-		else if( toast_message != null ) {
-			if( toast_message.length() > 0 )
-				showToast(null, toast_message);
-		}
-		else {
-			showPhotoVideoToast();
-		}
+		
 
 		// Must set preview size before starting camera preview
 		// and must do it after setting photo vs video mode
@@ -897,32 +886,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			zoomTo(new_zoom_factor, true);
 		}
 
-	    if( take_photo ) {
-			if( this.is_video ) {
-				this.switchVideo(true, true);
-			}
-			// take photo after a delay - otherwise we sometimes get a black image?!
-	    	final Handler handler = new Handler();
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					if( MyDebug.LOG )
-						Log.d(TAG, "do automatic take picture");
-					takePicture();
-				}
-			}, 500);
-		}
-	    else {
-	    	final Handler handler = new Handler();
-			handler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					if( MyDebug.LOG )
-						Log.d(TAG, "do startup autofocus");
-					tryAutoFocus(true, false); // so we get the autofocus when starting up - we do this on a delay, as calling it immediately means the autofocus doesn't seem to work properly sometimes (at least on Galaxy Nexus)
-				}
-			}, 500);
-	    }
 	}
 
 	private void setupCameraParameters() {
@@ -2283,129 +2246,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			text_base_y = canvas.getHeight()/2 + diff_x - (int)(0.5*text_y);
 		}
 		final int top_y = (int) (5 * scale + 0.5f); // convert dps to pixels
-
-		final String ybounds_text = getResources().getString(R.string.zoom) + getResources().getString(R.string.free_memory) + getResources().getString(R.string.angle) + getResources().getString(R.string.direction);
-		final double close_angle = 1.0f;
-		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED ) {
-			/*canvas.drawText("PREVIEW", canvas.getWidth() / 2,
-					canvas.getHeight() / 2, p);*/
-			boolean draw_angle = this.has_level_angle && sharedPreferences.getBoolean(MainActivity.getShowAnglePreferenceKey(), true);
-			boolean draw_geo_direction = this.has_geo_direction && sharedPreferences.getBoolean(MainActivity.getShowGeoDirectionPreferenceKey(), true);
-			if( draw_angle ) {
-				int color = Color.WHITE;
-				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				int pixels_offset_x = 0;
-				if( draw_geo_direction ) {
-					pixels_offset_x = - (int) (82 * scale + 0.5f); // convert dps to pixels
-					p.setTextAlign(Paint.Align.LEFT);
-				}
-				else {
-					p.setTextAlign(Paint.Align.CENTER);
-				}
-				if( Math.abs(this.level_angle) <= close_angle ) {
-					color = Color.rgb(20, 231, 21); // Green A400
-				}
-				String string = getResources().getString(R.string.angle) + ": " + decimalFormat.format(this.level_angle) + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2 + pixels_offset_x, text_base_y, false, ybounds_text);
-			}
-			if( draw_geo_direction ) {
-				int color = Color.WHITE;
-				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				if( draw_angle ) {
-					p.setTextAlign(Paint.Align.LEFT);
-				}
-				else {
-					p.setTextAlign(Paint.Align.CENTER);
-				}
-				float geo_angle = (float)Math.toDegrees(this.geo_direction[0]);
-				if( geo_angle < 0.0f ) {
-					geo_angle += 360.0f;
-				}
-				String string = " " + getResources().getString(R.string.direction) + ": " + Math.round(geo_angle) + (char)0x00B0;
-				drawTextWithBackground(canvas, p, string, color, Color.BLACK, canvas.getWidth() / 2, text_base_y, false, ybounds_text);
-			}
-			//if( this.is_taking_photo_on_timer ) {
-			if( this.isOnTimer() ) {
-				long remaining_time = (take_photo_time - System.currentTimeMillis() + 999)/1000;
-				if( MyDebug.LOG )
-					Log.d(TAG, "remaining_time: " + remaining_time);
-				if( remaining_time >= 0 ) {
-					p.setTextSize(42 * scale + 0.5f); // convert dps to pixels
-					p.setTextAlign(Paint.Align.CENTER);
-					drawTextWithBackground(canvas, p, "" + remaining_time, Color.rgb(229, 28, 35), Color.BLACK, canvas.getWidth() / 2, canvas.getHeight() / 2); // Red 500
-				}
-			}
-			else if( this.video_recorder != null && video_start_time_set ) {
-            	long video_time = (System.currentTimeMillis() - video_start_time);
-            	//int ms = (int)(video_time % 1000);
-            	video_time /= 1000;
-            	int secs = (int)(video_time % 60);
-            	video_time /= 60;
-            	int mins = (int)(video_time % 60);
-            	video_time /= 60;
-            	long hours = video_time;
-            	//String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs) + ":" + String.format("%03d", ms);
-            	String time_s = hours + ":" + String.format("%02d", mins) + ":" + String.format("%02d", secs);
-            	/*if( MyDebug.LOG )
-					Log.d(TAG, "video_time: " + video_time + " " + time_s);*/
-    			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-    			p.setTextAlign(Paint.Align.CENTER);
-				int pixels_offset_y = 3*text_y; // avoid overwriting the zoom label
-				int color = Color.rgb(229, 28, 35); // Red 500
-            	if( main_activity.isScreenLocked() ) {
-            		// writing in reverse order, bottom to top
-    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_2), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
-            		pixels_offset_y += text_y;
-    				drawTextWithBackground(canvas, p, getResources().getString(R.string.screen_lock_message_1), color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
-            		pixels_offset_y += text_y;
-            	}
-				drawTextWithBackground(canvas, p, time_s, color, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y);
-			}
-		}
-		else if( camera_controller == null ) {
-			/*if( MyDebug.LOG ) {
-				Log.d(TAG, "no camera!");
-				Log.d(TAG, "width " + canvas.getWidth() + " height " + canvas.getHeight());
-			}*/
-			p.setColor(Color.WHITE);
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.CENTER);
-			int pixels_offset = (int) (20 * scale + 0.5f); // convert dps to pixels
-			canvas.drawText(getResources().getString(R.string.failed_to_open_camera_1), canvas.getWidth() / 2, canvas.getHeight() / 2, p);
-			canvas.drawText(getResources().getString(R.string.failed_to_open_camera_2), canvas.getWidth() / 2, canvas.getHeight() / 2 + pixels_offset, p);
-			canvas.drawText(getResources().getString(R.string.failed_to_open_camera_3), canvas.getWidth() / 2, canvas.getHeight() / 2 + 2*pixels_offset, p);
-			//canvas.drawRect(0.0f, 0.0f, 100.0f, 100.0f, p);
-			//canvas.drawRGB(255, 0, 0);
-			//canvas.drawRect(0.0f, 0.0f, canvas.getWidth(), canvas.getHeight(), p);
-		}
-		if( this.has_zoom && camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowZoomPreferenceKey(), true) ) {
-			float zoom_ratio = this.zoom_ratios.get(zoom_factor)/100.0f;
-			// only show when actually zoomed in
-			if( zoom_ratio > 1.0f + 1.0e-5f ) {
-				// Convert the dps to pixels, based on density scale
-				int pixels_offset_y = 2*text_y;
-				p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-				p.setTextAlign(Paint.Align.CENTER);
-				drawTextWithBackground(canvas, p, getResources().getString(R.string.zoom) + ": " + zoom_ratio +"x", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
-			}
-		}
-		if( camera_controller != null && sharedPreferences.getBoolean(MainActivity.getShowFreeMemoryPreferenceKey(), true) ) {
-			int pixels_offset_y = 1*text_y;
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.CENTER);
-			long time_now = System.currentTimeMillis();
-			if( free_memory_gb < 0.0f || time_now > last_free_memory_time + 1000 ) {
-				long free_mb = main_activity.freeMemory();
-				if( free_mb >= 0 ) {
-					free_memory_gb = free_mb/1024.0f;
-					last_free_memory_time = time_now;
-				}
-			}
-			if( free_memory_gb >= 0.0f ) {
-				drawTextWithBackground(canvas, p, getResources().getString(R.string.free_memory) + ": " + decimalFormat.format(free_memory_gb) + "GB", Color.WHITE, Color.BLACK, canvas.getWidth() / 2, text_base_y - pixels_offset_y, false, ybounds_text);
-			}
-		}
-		
 		{
 			if( !this.has_battery_frac || System.currentTimeMillis() > this.last_battery_time + 60000 ) {
 				// only check periodically - unclear if checking is costly in any way
@@ -2497,36 +2337,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 		canvas.restore();
 		
-		if( camera_controller != null && this.phase != PHASE_PREVIEW_PAUSED && has_level_angle && sharedPreferences.getBoolean(MainActivity.getShowAngleLinePreferenceKey(), false) ) {
-			// n.b., must draw this without canvas rotation
-			int radius_dps = (ui_rotation == 90 || ui_rotation == 270) ? 60 : 80;
-			int radius = (int) (radius_dps * scale + 0.5f); // convert dps to pixels
-			double angle = - this.orig_level_angle;
-			// see http://android-developers.blogspot.co.uk/2010/09/one-screen-turn-deserves-another.html
-		    int rotation = main_activity.getWindowManager().getDefaultDisplay().getRotation();
-		    switch (rotation) {
-	    	case Surface.ROTATION_90:
-	    	case Surface.ROTATION_270:
-	    		angle += 90.0;
-	    		break;
-		    }
-			/*if( MyDebug.LOG ) {
-				Log.d(TAG, "orig_level_angle: " + orig_level_angle);
-				Log.d(TAG, "angle: " + angle);
-			}*/
-			int off_x = (int) (radius * Math.cos( Math.toRadians(angle) ));
-			int off_y = (int) (radius * Math.sin( Math.toRadians(angle) ));
-			int cx = canvas.getWidth()/2;
-			int cy = canvas.getHeight()/2;
-			if( Math.abs(this.level_angle) <= close_angle ) { // n.b., use level_angle, not angle or orig_level_angle
-				p.setColor(Color.rgb(20, 231, 21)); // Green A400
-			}
-			else {
-				p.setColor(Color.WHITE);
-			}
-			canvas.drawLine(cx - off_x, cy - off_y, cx + off_x, cy + off_y, p);
-		}
-
 		if( this.focus_success != FOCUS_DONE ) {
 			int size = (int) (50 * scale + 0.5f); // convert dps to pixels
 			if( this.focus_success == FOCUS_SUCCESS )
@@ -2797,42 +2607,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			return;
 		String toast_string = "";
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		if( this.is_video ) {
-			CamcorderProfile profile = getCamcorderProfile();
-			String bitrate_string = "";
-			if( profile.videoBitRate >= 10000000 )
-				bitrate_string = profile.videoBitRate/1000000 + "Mbps";
-			else if( profile.videoBitRate >= 10000 )
-				bitrate_string = profile.videoBitRate/1000 + "Kbps";
-			else
-				bitrate_string = profile.videoBitRate + "bps";
-
-			String timer_value = sharedPreferences.getString(MainActivity.getVideoMaxDurationPreferenceKey(), "0");
-			toast_string = getResources().getString(R.string.video) + ": " + profile.videoFrameWidth + "x" + profile.videoFrameHeight + ", " + profile.videoFrameRate + "fps, " + bitrate_string;
-			boolean record_audio = sharedPreferences.getBoolean(MainActivity.getRecordAudioPreferenceKey(), true);
-			if( !record_audio ) {
-				toast_string += "\n" + getResources().getString(R.string.audio_disabled);
-			}
-			if( timer_value.length() > 0 && !timer_value.equals("0") ) {
-				String [] entries_array = getResources().getStringArray(R.array.preference_video_max_duration_entries);
-				String [] values_array = getResources().getStringArray(R.array.preference_video_max_duration_values);
-				int index = Arrays.asList(values_array).indexOf(timer_value);
-				if( index != -1 ) { // just in case!
-					String entry = entries_array[index];
-					toast_string += "\n" + getResources().getString(R.string.max_duration) +": " + entry;
-				}
-			}
-			if( sharedPreferences.getBoolean(MainActivity.getVideoFlashPreferenceKey(), false) && supportsFlash() ) {
-				toast_string += "\n" + getResources().getString(R.string.preference_video_flash);
-			}
-		}
-		else {
-			toast_string = getResources().getString(R.string.photo);
-			if( current_size_index != -1 && sizes != null ) {
-				CameraController.Size current_size = sizes.get(current_size_index);
-				toast_string += " " + current_size.width + "x" + current_size.height;
-			}
-		}
+		
 		int current_exposure = camera_controller.getExposureCompensation();
 		if( current_exposure != 0 ) {
 			toast_string += "\n" + getResources().getString(R.string.exposure) + ": " + (current_exposure > 0 ? "+" : "") + current_exposure;
@@ -2914,75 +2689,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	    	}
 	    	camera_controller.setPreviewFpsRange(selected_min_fps, selected_max_fps);
         }
-	}
-	
-	void switchVideo(boolean save, boolean update_preview_size) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "switchVideo()");
-		if( camera_controller == null ) {
-			if( MyDebug.LOG )
-				Log.d(TAG, "camera not opened!");
-			return;
-		}
-		boolean old_is_video = is_video;
-		if( this.is_video ) {
-			if( video_recorder != null ) {
-				stopVideo(false);
-			}
-			this.is_video = false;
-			showPhotoVideoToast();
-		}
-		else {
-			if( this.isOnTimer() ) {
-				cancelTimer();
-				this.is_video = true;
-			}
-			//else if( this.is_taking_photo ) {
-			else if( this.phase == PHASE_TAKING_PHOTO ) {
-				// wait until photo taken
-				if( MyDebug.LOG )
-					Log.d(TAG, "wait until photo taken");
-			}
-			else {
-				this.is_video = true;
-			}
-			
-			if( this.is_video ) {
-				showPhotoVideoToast();
-			}
-		}
-		
-		if( is_video != old_is_video ) {
-			updateFocusForVideo(false); // don't do autofocus, as it'll be cancelled when restarting preview
-
-			Activity activity = (Activity)this.getContext();
-			ImageButton view = (ImageButton)activity.findViewById(R.id.take_photo);
-			view.setImageResource(is_video ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
-
-			if( save ) {
-				// now save
-				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-				SharedPreferences.Editor editor = sharedPreferences.edit();
-				editor.putBoolean(MainActivity.getIsVideoPreferenceKey(), is_video);
-				editor.apply();
-	    	}
-			
-			if( update_preview_size ) {
-				if( this.is_preview_started ) {
-					camera_controller.stopPreview();
-					this.is_preview_started = false;
-				}
-				setPreviewSize();
-				if( !is_video && has_current_fps_range ) {
-					// if is_video is true, we set the preview fps range in startCameraPreview()
-					if( MyDebug.LOG )
-						Log.d(TAG, "    reset preview to current fps range: " + current_fps_range[0] + " to " + current_fps_range[1]);
-					camera_controller.setPreviewFpsRange(current_fps_range[0], current_fps_range[1]);
-				}
-				// always start the camera preview, even if it was previously paused
-		        this.startCameraPreview();
-			}
-		}
 	}
 	
 	boolean focusIsVideo() {
@@ -4763,14 +4469,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			public void run() {
 		    	final int visibility = show ? View.VISIBLE : View.GONE;
 			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
-			    View switchVideoButton = (View) main_activity.findViewById(R.id.switch_video);
 			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
 			    View popupButton = (View) main_activity.findViewById(R.id.popup);
 			    if( Camera.getNumberOfCameras() > 1 )
 			    	switchCameraButton.setVisibility(visibility);
-			    if( !is_video )
-			    	switchVideoButton.setVisibility(visibility); // still allow switch video when recording video
 			    if( exposures != null && !is_video ) // still allow exposure when recording video
 			    	exposureButton.setVisibility(visibility);
 			    if( is_exposure_lock_supported && !is_video ) // still allow exposure lock when recording video

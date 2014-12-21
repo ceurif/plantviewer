@@ -564,22 +564,13 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 	
-			view = findViewById(R.id.switch_video);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.exposure);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
-	
 			view = findViewById(R.id.switch_camera);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_left, 0);
 			layoutParams.addRule(align_parent_right, 0);
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.switch_video);
+			layoutParams.addRule(left_of, R.id.exposure);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -768,14 +759,7 @@ public class MainActivity extends Activity {
 		this.preview.switchCamera();
     }
 
-    public void clickedSwitchVideo(View view) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "clickedSwitchVideo");
-		this.closePopup();
-		this.preview.switchVideo(true, true);
-    }
-
-    public void clickedFlash(View view) {
+     public void clickedFlash(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedFlash");
     	this.preview.cycleFlash();

@@ -98,16 +98,6 @@
         android:onClick="clickedExposure"
         />
 
-    <ImageButton
-        android:id="@+id/switch_video"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/switch_video"
-        android:src="@drawable/switch_video"
-        android:onClick="clickedSwitchVideo"
-        />
 
     <ImageButton
         android:id="@+id/switch_camera"
