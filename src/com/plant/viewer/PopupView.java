@@ -164,23 +164,13 @@ public class PopupView extends LinearLayout {
 
         	final String [] timer_values = getResources().getStringArray(R.array.preference_timer_values);
         	String [] timer_entries = getResources().getStringArray(R.array.preference_timer_entries);
-    		String timer_value = sharedPreferences.getString(MainActivity.getTimerPreferenceKey(), "0");
-    		timer_index = Arrays.asList(timer_values).indexOf(timer_value);
-    		if( timer_index == -1 ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "can't find timer_value " + timer_value + " in timer_values!");
-				timer_index = 0;
-    		}
+    		
+    		
     		addArrayOptionsToPopup(Arrays.asList(timer_entries), getResources().getString(R.string.preference_timer), timer_index, new ArrayOptionsPopupListener() {
     			private void update() {
     				if( timer_index == -1 )
     					return;
-    				String new_timer_value = timer_values[timer_index];
-    				SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(main_activity);
-					SharedPreferences.Editor editor = sharedPreferences.edit();
-					editor.putString(MainActivity.getTimerPreferenceKey(), new_timer_value);
-					editor.apply();
-    			}
+    				}
 				@Override
 				public int onClickPrev() {
 	        		if( timer_index != -1 && timer_index > 0 ) {

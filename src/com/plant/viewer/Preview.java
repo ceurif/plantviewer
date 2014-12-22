@@ -2944,92 +2944,12 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	// make sure that preview running (also needed to hide trash/share icons)
         this.startCameraPreview();
 
-        //is_taking_photo = true;
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		String timer_value = sharedPreferences.getString(MainActivity.getTimerPreferenceKey(), "0");
+        
 		long timer_delay = 0;
-		try {
-			timer_delay = Integer.parseInt(timer_value) * 1000;
-		}
-        catch(NumberFormatException e) {
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "failed to parse preference_timer value: " + timer_value);
-    		e.printStackTrace();
-    		timer_delay = 0;
-        }
-
-		String burst_mode_value = sharedPreferences.getString(MainActivity.getBurstModePreferenceKey(), "1");
-		try {
-			n_burst = Integer.parseInt(burst_mode_value);
-    		if( MyDebug.LOG )
-    			Log.d(TAG, "n_burst: " + n_burst);
-		}
-        catch(NumberFormatException e) {
-    		if( MyDebug.LOG )
-    			Log.e(TAG, "failed to parse preference_burst_mode value: " + burst_mode_value);
-    		e.printStackTrace();
-    		n_burst = 1;
-        }
 		remaining_burst_photos = n_burst-1;
 		
 		if( timer_delay == 0 ) {
 			takePicture();
-		}
-		else {
-			takePictureOnTimer(timer_delay, false);
-		}
-	}
-	
-	private void takePictureOnTimer(long timer_delay, boolean repeated) {
-		if( MyDebug.LOG ) {
-			Log.d(TAG, "takePictureOnTimer");
-			Log.d(TAG, "timer_delay: " + timer_delay);
-		}
-        this.phase = PHASE_TIMER;
-		class TakePictureTimerTask extends TimerTask {
-			public void run() {
-				if( beepTimerTask != null ) {
-					beepTimerTask.cancel();
-					beepTimerTask = null;
-				}
-				MainActivity main_activity = (MainActivity)Preview.this.getContext();
-				main_activity.runOnUiThread(new Runnable() {
-					public void run() {
-						// we run on main thread to avoid problem of camera closing at the same time
-						// but still need to check that the camera hasn't closed or the task halted, since TimerTask.run() started
-						if( camera_controller != null && takePictureTimerTask != null )
-							takePicture();
-						else {
-							if( MyDebug.LOG )
-								Log.d(TAG, "takePictureTimerTask: don't take picture, as already cancelled");
-						}
-					}
-				});
-			}
-		}
-		take_photo_time = System.currentTimeMillis() + timer_delay;
-		if( MyDebug.LOG )
-			Log.d(TAG, "take photo at: " + take_photo_time);
-		/*if( !repeated ) {
-			showToast(take_photo_toast, R.string.started_timer);
-		}*/
-    	takePictureTimer.schedule(takePictureTimerTask = new TakePictureTimerTask(), timer_delay);
-
-		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.getContext());
-		if( sharedPreferences.getBoolean(MainActivity.getTimerBeepPreferenceKey(), true) ) {
-    		class BeepTimerTask extends TimerTask {
-    			public void run() {
-    			    try {
-    			        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-    					Activity activity = (Activity)getContext();
-    			        Ringtone r = RingtoneManager.getRingtone(activity.getApplicationContext(), notification);
-    			        r.play();
-    			    }
-    			    catch(Exception e) {
-    			    }		
-    			}
-    		}
-        	beepTimer.schedule(beepTimerTask = new BeepTimerTask(), 0, 1000);
 		}
 	}
 	
@@ -4002,17 +3922,9 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            if( remaining_burst_photos > 0 ) {
 	            	remaining_burst_photos--;
 
-	        		String timer_value = sharedPreferences.getString(MainActivity.getBurstIntervalPreferenceKey(), "0");
+	        		
 	        		long timer_delay = 0;
-	        		try {
-	        			timer_delay = Integer.parseInt(timer_value) * 1000;
-	        		}
-	                catch(NumberFormatException e) {
-	            		if( MyDebug.LOG )
-	            			Log.e(TAG, "failed to parse preference_burst_interval value: " + timer_value);
-	            		e.printStackTrace();
-	            		timer_delay = 0;
-	                }
+	        		
 
 	        		if( timer_delay == 0 ) {
 	        			// we go straight to taking a photo rather than refocusing, for speed
@@ -4021,9 +3933,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 						showGUI(false);
 		            	takePictureWhenFocused();
 	        		}
-	        		else {
-	        			takePictureOnTimer(timer_delay, true);
-	        		}
+	        		
 	            }
     	    }
     	};

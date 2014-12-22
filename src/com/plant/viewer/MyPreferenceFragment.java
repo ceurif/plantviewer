@@ -48,18 +48,6 @@ public class MyPreferenceFragment extends PreferenceFragment {
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_auto_stabilise: " + supports_auto_stabilise);
 
-		/*if( !supports_auto_stabilise ) {
-			Preference pref = (Preference)findPreference("preference_auto_stabilise");
-			PreferenceGroup pg = (PreferenceGroup)this.findPreference("preference_category_camera_effects");
-        	pg.removePreference(pref);
-		}*/
-
-		//readFromBundle(bundle, "color_effects", Preview.getColorEffectPreferenceKey(), Camera.Parameters.EFFECT_NONE, "preference_category_camera_effects");
-		//readFromBundle(bundle, "scene_modes", Preview.getSceneModePreferenceKey(), Camera.Parameters.SCENE_MODE_AUTO, "preference_category_camera_effects");
-		//readFromBundle(bundle, "white_balances", Preview.getWhiteBalancePreferenceKey(), Camera.Parameters.WHITE_BALANCE_AUTO, "preference_category_camera_effects");
-		//readFromBundle(bundle, "isos", Preview.getISOPreferenceKey(), "auto", "preference_category_camera_effects");
-		//readFromBundle(bundle, "exposures", "preference_exposure", "0", "preference_category_camera_effects");
-
 		final boolean supports_face_detection = bundle.getBoolean("supports_face_detection");
 		if( MyDebug.LOG )
 			Log.d(TAG, "supports_face_detection: " + supports_face_detection);
