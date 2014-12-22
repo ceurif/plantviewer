@@ -706,7 +706,7 @@ public class MainActivity extends Activity {
 			// set icon for taking photos vs videos
 			ImageButton view = (ImageButton)findViewById(R.id.take_photo);
 			if( preview != null ) {
-				view.setImageResource(preview.isVideo() ? R.drawable.take_video_selector : R.drawable.take_photo_selector);
+				view.setImageResource(R.drawable.take_photo_selector);
 			}
 		}
     }
