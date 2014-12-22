@@ -487,7 +487,7 @@ public class MainActivity extends Activity {
 	    }
 	    // getRotation is anti-clockwise, but current_orientation is clockwise, so we add rather than subtract
 	    // relative_orientation is clockwise from landscape-left
-    	//int relative_orientation = (current_orientation + 360 - degrees) % 360;
+    	
     	int relative_orientation = (current_orientation + degrees) % 360;
 		if( MyDebug.LOG ) {
 			Log.d(TAG, "    current_orientation = " + current_orientation);
@@ -564,22 +564,12 @@ public class MainActivity extends Activity {
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
 	
-			view = findViewById(R.id.switch_camera);
-			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
-			layoutParams.addRule(align_parent_left, 0);
-			layoutParams.addRule(align_parent_right, 0);
-			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
-			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.exposure);
-			layoutParams.addRule(right_of, 0);
-			view.setLayoutParams(layoutParams);
-			view.setRotation(ui_rotation);
 	
 			view = findViewById(R.id.trash);
 			layoutParams = (RelativeLayout.LayoutParams)view.getLayoutParams();
 			layoutParams.addRule(align_parent_top, RelativeLayout.TRUE);
 			layoutParams.addRule(align_parent_bottom, 0);
-			layoutParams.addRule(left_of, R.id.switch_camera);
+			layoutParams.addRule(left_of, R.id.exposure);
 			layoutParams.addRule(right_of, 0);
 			view.setLayoutParams(layoutParams);
 			view.setRotation(ui_rotation);
@@ -750,13 +740,6 @@ public class MainActivity extends Activity {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedTakePhoto");
     	this.takePicture();
-    }
-
-    public void clickedSwitchCamera(View view) {
-		if( MyDebug.LOG )
-			Log.d(TAG, "clickedSwitchCamera");
-		this.closePopup();
-		this.preview.switchCamera();
     }
 
      public void clickedFlash(View view) {

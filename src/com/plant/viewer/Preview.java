@@ -2318,27 +2318,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 					calculateCameraToPreviewMatrix();
 					face_rect.set(face.rect);
 					this.camera_to_preview_matrix.mapRect(face_rect);
-					/*int eye_radius = (int) (5 * scale + 0.5f); // convert dps to pixels
-					int mouth_radius = (int) (10 * scale + 0.5f); // convert dps to pixels
-					float [] top_left = {face.rect.left, face.rect.top};
-					float [] bottom_right = {face.rect.right, face.rect.bottom};
-					canvas.drawRect(top_left[0], top_left[1], bottom_right[0], bottom_right[1], p);*/
-					canvas.drawRect(face_rect, p);
-					/*if( face.leftEye != null ) {
-						float [] left_point = {face.leftEye.x, face.leftEye.y};
-						cameraToPreview(left_point);
-						canvas.drawCircle(left_point[0], left_point[1], eye_radius, p);
-					}
-					if( face.rightEye != null ) {
-						float [] right_point = {face.rightEye.x, face.rightEye.y};
-						cameraToPreview(right_point);
-						canvas.drawCircle(right_point[0], right_point[1], eye_radius, p);
-					}
-					if( face.mouth != null ) {
-						float [] mouth_point = {face.mouth.x, face.mouth.y};
-						cameraToPreview(mouth_point);
-						canvas.drawCircle(mouth_point[0], mouth_point[1], mouth_radius, p);
-					}*/
+					
 				}
 			}
 			p.setStyle(Paint.Style.FILL); // reset
@@ -2518,35 +2498,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	void switchCamera() {
-		if( MyDebug.LOG )
-			Log.d(TAG, "switchCamera()");
-		//if( is_taking_photo && !is_taking_photo_on_timer ) {
-		if( this.phase == PHASE_TAKING_PHOTO ) {
-			// just to be safe - risk of cancelling the autofocus before taking a photo, or otherwise messing things up
-			if( MyDebug.LOG )
-				Log.d(TAG, "currently taking a photo");
-			return;
-		}
-		int n_cameras = Camera.getNumberOfCameras();
-		if( MyDebug.LOG )
-			Log.d(TAG, "found " + n_cameras + " cameras");
-		if( n_cameras > 1 ) {
-			closeCamera();
-			cameraId = (cameraId+1) % n_cameras;
-		    if( CameraController.isFrontFacing(cameraId) ) {
-				showToast(switch_camera_toast, R.string.front_camera);
-		    }
-		    else {
-				showToast(switch_camera_toast, R.string.back_camera);
-		    }
-		    //zoom_factor = 0; // reset zoom when switching camera
-			this.openCamera();
-			
-			// we update the focus, in case we weren't able to do it when switching video with a camera that didn't support focus modes
-			updateFocusForVideo(true);
-		}
-	}
 	
 	private void showPhotoVideoToast() {
 		MainActivity main_activity = (MainActivity)Preview.this.getContext();
@@ -2800,14 +2751,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
     	return this.supported_flash_values.get(current_flash_index);
     }
     
-	// this returns the flash mode indicated by the UI, rather than from the camera parameters (may be different, e.g., in startup autofocus!)
-	/*public String getCurrentFlashMode() {
-		if( current_flash_index == -1 )
-			return null;
-		String flash_value = supported_flash_values.get(current_flash_index);
-		String flash_mode = convertFlashValueToMode(flash_value);
-		return flash_mode;
-	}*/
 
 	void cycleFocusMode() {
 		if( MyDebug.LOG )
