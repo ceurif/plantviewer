@@ -97,18 +97,6 @@
         android:onClick="clickedExposure"
         />
 
-
-    <ImageButton
-        android:id="@+id/switch_camera"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:padding="10dp"
-        android:scaleType="fitCenter"
-        android:contentDescription="@string/switch_camera"
-        android:src="@drawable/switch_camera"
-        android:onClick="clickedSwitchCamera"
-        />
-
     <!-- should be at left-most -->
     <ImageButton
         android:id="@+id/trash"

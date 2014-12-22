@@ -810,10 +810,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				//Log.d(TAG, "time after setting preview display: " + (System.currentTimeMillis() - debug_time));
 			}
 
-		    View switchCameraButton = (View) activity.findViewById(R.id.switch_camera);
-		    switchCameraButton.setVisibility(Camera.getNumberOfCameras() > 1 ? View.VISIBLE : View.GONE);
-
-		    setupCamera(toast_message, take_photo);
+		   setupCamera(toast_message, take_photo);
 		}
     	setPopupIcon(); // needed so that the icon is set right even if no flash mode is set when starting up camera (e.g., switching to front camera with no flash)
 
@@ -4358,12 +4355,11 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		main_activity.runOnUiThread(new Runnable() {
 			public void run() {
 		    	final int visibility = show ? View.VISIBLE : View.GONE;
-			    View switchCameraButton = (View) main_activity.findViewById(R.id.switch_camera);
+			    
 			    View exposureButton = (View) main_activity.findViewById(R.id.exposure);
 			    View exposureLockButton = (View) main_activity.findViewById(R.id.exposure_lock);
 			    View popupButton = (View) main_activity.findViewById(R.id.popup);
-			    if( Camera.getNumberOfCameras() > 1 )
-			    	switchCameraButton.setVisibility(visibility);
+			    
 			    if( exposures != null && !is_video ) // still allow exposure when recording video
 			    	exposureButton.setVisibility(visibility);
 			    if( is_exposure_lock_supported && !is_video ) // still allow exposure lock when recording video
