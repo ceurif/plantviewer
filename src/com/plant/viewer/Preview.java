@@ -2282,28 +2282,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			}
 		}
 		
-		{
-			p.setTextSize(14 * scale + 0.5f); // convert dps to pixels
-			p.setTextAlign(Paint.Align.LEFT);
-			int location_x = (int) (50 * scale + 0.5f); // convert dps to pixels
-			int location_y = top_y;
-			if( ui_rotation == 90 || ui_rotation == 270 ) {
-				int diff = canvas.getWidth() - canvas.getHeight();
-				location_x += diff/2;
-				location_y -= diff/2;
-			}
-			if( ui_rotation == 90 ) {
-				location_y = canvas.getHeight() - location_y - location_size;
-			}
-			if( ui_rotation == 180 ) {
-				location_x = canvas.getWidth() - location_x;
-				p.setTextAlign(Paint.Align.RIGHT);
-			}
-	        Calendar c = Calendar.getInstance();
-	        String current_time = DateFormat.getTimeInstance().format(c.getTime());
-	        drawTextWithBackground(canvas, p, current_time, Color.WHITE, Color.BLACK, location_x, location_y, true);
-	    }
-
 		canvas.restore();
 		
 		if( this.focus_success != FOCUS_DONE ) {
