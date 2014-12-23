@@ -4002,14 +4002,6 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 			if( preview_image_name != null ) {
 				 Intent intent = new Intent(null, CropActivity.class);
 			     startActivity(intent);
-				
-//				if( MyDebug.LOG )
-//					Log.d(TAG, "Share: " + preview_image_name);
-//				Intent intent = new Intent(Intent.ACTION_SEND);
-//				intent.setType("image/jpeg");
-//				intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + preview_image_name));
-//				Activity activity = (Activity)this.getContext();
-//				activity.startActivity(Intent.createChooser(intent, "Photo"));
 			}
 			startCameraPreview();
 			tryAutoFocus(false, false);
@@ -4239,7 +4231,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				faces_detected = null;
 			}
 		}
-		this.setPreviewPaused(true);
+		this.setPreviewPaused(false);
     }
 
     private void setPreviewPaused(boolean paused) {
