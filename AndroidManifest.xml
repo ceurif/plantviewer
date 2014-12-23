@@ -64,6 +64,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".CropActivity"
+            android:configChanges="keyboardHidden"
+            android:label="@string/app_name" 
+            android:screenOrientation="portrait">
+        </activity>
+        
+        <activity
+            android:name=".TemplateSelectDialog"
+            android:configChanges="keyboardHidden"
+            android:label="@string/sd_select_template_text" 
+            android:theme="@android:style/Theme.Dialog"
+            android:screenOrientation="portrait">
+        </activity>
         <receiver
 		    android:icon="@drawable/ic_launcher"
 		    android:label="@string/app_name"
@@ -92,3 +106,5 @@
     </application>
 
 </manifest>
+
+

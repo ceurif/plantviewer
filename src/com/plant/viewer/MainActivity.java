@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.plant.viewer.R.string;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -1513,7 +1515,12 @@ public class MainActivity extends Activity {
     public void clickedShare(View view) {
 		if( MyDebug.LOG )
 			Log.d(TAG, "clickedShare");
-    	this.preview.clickedShare();
+		String filename =  this.preview.filename();
+		filename = filename.substring(36);
+		Intent intent = new Intent(this, CropActivity.class);
+		intent.putExtra("image", filename );
+	    startActivity(intent);
+		
     }
 
     public void clickedTrash(View view) {
@@ -1666,29 +1673,6 @@ public class MainActivity extends Activity {
     		 		}
     			}
     		);
-	        /*ContentValues values = new ContentValues(); 
-	        values.put(ImageColumns.TITLE, file.getName().substring(0, file.getName().lastIndexOf(".")));
-	        values.put(ImageColumns.DISPLAY_NAME, file.getName());
-	        values.put(ImageColumns.DATE_TAKEN, System.currentTimeMillis()); 
-	        values.put(ImageColumns.MIME_TYPE, "image/jpeg");
-	        // TODO: orientation
-	        values.put(ImageColumns.DATA, file.getAbsolutePath());
-	        Location location = preview.getLocation();
-	        if( location != null ) {
-    	        values.put(ImageColumns.LATITUDE, location.getLatitude()); 
-    	        values.put(ImageColumns.LONGITUDE, location.getLongitude()); 
-	        }
-	        try {
-	    		this.getContentResolver().insert(Images.Media.EXTERNAL_CONTENT_URI, values); 
-	        }
-	        catch (Throwable th) { 
-    	        // This can happen when the external volume is already mounted, but 
-    	        // MediaScanner has not notify MediaProvider to add that volume. 
-    	        // The picture is still safe and MediaScanner will find it and 
-    	        // insert it into MediaProvider. The only problem is that the user 
-    	        // cannot click the thumbnail to review the picture. 
-    	        Log.e(TAG, "Failed to write MediaStore" + th); 
-    	    }*/
     	}
 	}
     

@@ -9,7 +9,6 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -19,6 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
 
+import android.R.string;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -32,10 +32,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Paint.Align;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Paint.Align;
 import android.hardware.Camera;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
@@ -44,12 +44,9 @@ import android.media.CamcorderProfile;
 import android.media.ExifInterface;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
-import android.media.Ringtone;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -66,9 +63,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 import android.widget.ZoomControls;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 
 public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final String TAG = "Preview";
@@ -3555,6 +3552,8 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
             			}
     				}
     				if( bitmap != null ) {
+    					
+    					
             			if( MyDebug.LOG )
             				Log.d(TAG, "stamp info to bitmap");
 	        			int width = bitmap.getWidth();
@@ -3566,6 +3565,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        			Canvas canvas = new Canvas(bitmap);
 	        			final float scale = getResources().getDisplayMetrics().density;
 	        			p.setColor(Color.WHITE);
+	        		
 	        			p.setTextSize(20 * scale + 0.5f); // convert dps to pixels
 	        	        String time_stamp = DateFormat.getDateTimeInstance().format(new Date());
 	        	        int offset_x = (int)(8 * scale + 0.5f); // convert dps to pixels
@@ -3609,6 +3609,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	        			}
 	        			else
 	        			{
+	        				
 	        			    // If the intent doesn't contain an URI, send the bitmap as a parcel
 	        			    // (it is a good idea to reduce its size to ~50k pixels before)
 		        			if( MyDebug.LOG )
@@ -3635,7 +3636,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				        				Log.d(TAG, "scale to " + scale);
 				        		    Matrix matrix = new Matrix();
 				        		    matrix.postScale(scale, scale);
-				        		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, matrix, true);
+				        		    Bitmap new_bitmap = Bitmap.createBitmap(bitmap, 0, 0, 100, height, matrix, true);
 				        		    // careful, as new_bitmap is sometimes not a copy!
 				        		    if( new_bitmap != bitmap ) {
 				        		    	bitmap.recycle();
@@ -3808,7 +3809,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	            }
 	            else {
 	    	        phase = PHASE_NORMAL;
-					boolean pause_preview = sharedPreferences.getBoolean(MainActivity.getPausePreviewPreferenceKey(), false);
+					boolean pause_preview = sharedPreferences.getBoolean(MainActivity.getPausePreviewPreferenceKey(), true);
 	        		if( MyDebug.LOG )
 	        			Log.d(TAG, "pause_preview? " + pause_preview);
 					if( pause_preview && success ) {
@@ -3947,16 +3948,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
         	camera_controller.enableShutterSound(enable_sound);
     		if( MyDebug.LOG )
     			Log.d(TAG, "about to call takePicture");
-    		/*String toast_text = "";
-    		if( n_burst > 1 ) {
-    			int photo = (n_burst-remaining_burst_photos);
-    			toast_text = getResources().getString(R.string.taking_photo) + "... (" +  photo + " / " + n_burst + ")";
-    		}
-    		else {
-    			toast_text = getResources().getString(R.string.taking_photo) + "...";
-    		}
-    		if( MyDebug.LOG )
-    			Log.d(TAG, toast_text);*/
+    		
     		try {
     			camera_controller.takePicture(null, jpegPictureCallback);
         		count_cameraTakePicture++;
@@ -3994,6 +3986,13 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		   	exif.setAttribute(TAG_GPS_IMG_DIRECTION_REF, "M");
     	}
 	}
+	
+	
+	public String filename() {
+		
+		return preview_image_name;
+		
+	}
 
 	void clickedShare() {
 		if( MyDebug.LOG )
@@ -4001,17 +4000,25 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		//if( is_preview_paused ) {
 		if( this.phase == PHASE_PREVIEW_PAUSED ) {
 			if( preview_image_name != null ) {
-				if( MyDebug.LOG )
-					Log.d(TAG, "Share: " + preview_image_name);
-				Intent intent = new Intent(Intent.ACTION_SEND);
-				intent.setType("image/jpeg");
-				intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + preview_image_name));
-				Activity activity = (Activity)this.getContext();
-				activity.startActivity(Intent.createChooser(intent, "Photo"));
+				 Intent intent = new Intent(null, CropActivity.class);
+			     startActivity(intent);
+				
+//				if( MyDebug.LOG )
+//					Log.d(TAG, "Share: " + preview_image_name);
+//				Intent intent = new Intent(Intent.ACTION_SEND);
+//				intent.setType("image/jpeg");
+//				intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://" + preview_image_name));
+//				Activity activity = (Activity)this.getContext();
+//				activity.startActivity(Intent.createChooser(intent, "Photo"));
 			}
 			startCameraPreview();
 			tryAutoFocus(false, false);
 		}
+	}
+
+	private void startActivity(Intent intent) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	void clickedTrash() {
@@ -4232,7 +4239,7 @@ public class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				faces_detected = null;
 			}
 		}
-		this.setPreviewPaused(false);
+		this.setPreviewPaused(true);
     }
 
     private void setPreviewPaused(boolean paused) {
