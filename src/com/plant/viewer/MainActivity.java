@@ -1521,6 +1521,7 @@ public class MainActivity extends Activity {
 		intent.putExtra("image", filename );
 	    startActivity(intent);
 		
+	    
     }
 
     public void clickedTrash(View view) {
